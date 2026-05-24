@@ -1,20 +1,77 @@
--- !strict
+--[[
+    GameSense Inspired UI Library
+    Minimal Executor-Friendly UI Library
+
+    FEATURES:
+    - Window
+    - Tabs
+    - Sections
+    - Buttons
+    - Toggles
+    - Sliders
+    - Dropdowns
+    - Labels
+    - Notifications
+
+    DOCUMENTATION:
+    local Library = loadstring(game:HttpGet("URL"))()
+
+    local Window = Library:CreateWindow({
+        Title = "gamesense.pub",
+        Size = UDim2.fromOffset(600, 450)
+    })
+
+    local Rage = Window:CreateTab("Rage")
+    local Main = Rage:CreateSection("Main")
+
+    Main:CreateButton({
+        Name = "Print Hello",
+        Callback = function()
+            print("hello")
+        end
+    })
+
+    Main:CreateToggle({
+        Name = "Silent Aim",
+        Default = false,
+        Callback = function(v)
+            print(v)
+        end
+    })
+
+    Main:CreateSlider({
+        Name = "FOV",
+        Min = 0,
+        Max = 180,
+        Default = 90,
+        Callback = function(v)
+            print(v)
+        end
+    })
+
+    Main:CreateDropdown({
+        Name = "Hitbox",
+        Options = {"Head", "Torso", "Random"},
+        Default = "Head",
+        Callback = function(v)
+            print(v)
+        end
+    })
+
+    Library:Notify("Loaded", 3)
+]]
+
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local TextService = game:GetService("TextService")
 
 local Library = {}
-
 Library.Theme = {
-    Background = Color3.fromRGB(16,16,16),
-    Surface = Color3.fromRGB(22,22,22),
-    Surface2 = Color3.fromRGB(28,28,28),
-    Outline = Color3.fromRGB(40,40,40),
-
-    Accent = Color3.fromRGB(170, 85, 255),
-
+    Background = Color3.fromRGB(17,17,17),
+    LightBackground = Color3.fromRGB(24,24,24),
+    Accent = Color3.fromRGB(140, 91, 255),
     Text = Color3.fromRGB(255,255,255),
-    DarkText = Color3.fromRGB(170,170,170)
+    DarkText = Color3.fromRGB(170,170,170),
+    Outline = Color3.fromRGB(40,40,40)
 }
 
 function Library:Create(class, props)
@@ -30,34 +87,34 @@ end
 function Library:Notify(text, duration)
     duration = duration or 3
 
-    local gui = game.CoreGui:FindFirstChild("gs_notify")
+    local gui = game.CoreGui:FindFirstChild("GS_Notify")
 
     if not gui then
         gui = Instance.new("ScreenGui")
-        gui.Name = "gs_notify"
+        gui.Name = "GS_Notify"
         gui.Parent = game.CoreGui
     end
 
     local frame = self:Create("Frame", {
         Parent = gui,
-        BackgroundColor3 = self.Theme.Surface,
+        BackgroundColor3 = self.Theme.Background,
         BorderColor3 = self.Theme.Outline,
-        Size = UDim2.new(0, 280, 0, 40),
-        Position = UDim2.new(1, 300, 1, -60)
+        Position = UDim2.new(1, -320, 1, -100),
+        Size = UDim2.new(0, 300, 0, 40)
     })
 
-    self:Create("Frame", {
+    local accent = self:Create("Frame", {
         Parent = frame,
         BackgroundColor3 = self.Theme.Accent,
         BorderSizePixel = 0,
         Size = UDim2.new(0, 3, 1, 0)
     })
 
-    self:Create("TextLabel", {
+    local label = self:Create("TextLabel", {
         Parent = frame,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 10, 0, 0),
         Size = UDim2.new(1, -10, 1, 0),
+        Position = UDim2.new(0, 10, 0, 0),
         Font = Enum.Font.Code,
         Text = text,
         TextColor3 = self.Theme.Text,
@@ -65,20 +122,22 @@ function Library:Notify(text, duration)
         TextXAlignment = Enum.TextXAlignment.Left
     })
 
+    frame.Position = frame.Position + UDim2.new(0, 400, 0, 0)
+
     TweenService:Create(
         frame,
         TweenInfo.new(.2),
-        {Position = UDim2.new(1, -290, 1, -60)}
+        {Position = UDim2.new(1, -320, 1, -100)}
     ):Play()
 
     task.delay(duration, function()
         TweenService:Create(
             frame,
             TweenInfo.new(.2),
-            {Position = UDim2.new(1, 300, 1, -60)}
+            {Position = frame.Position + UDim2.new(0, 400, 0, 0)}
         ):Play()
 
-        task.wait(.2)
+        task.wait(.25)
 
         frame:Destroy()
     end)
@@ -90,15 +149,13 @@ function Library:CreateWindow(cfg)
     local Window = {}
 
     local ScreenGui = self:Create("ScreenGui", {
-        Name = "gamesense_ui",
+        Name = "gamesense",
         ResetOnSpawn = false
     })
 
-    pcall(function()
-        if syn and syn.protect_gui then
-            syn.protect_gui(ScreenGui)
-        end
-    end)
+    if syn and syn.protect_gui then
+        syn.protect_gui(ScreenGui)
+    end
 
     ScreenGui.Parent = game.CoreGui
 
@@ -106,55 +163,48 @@ function Library:CreateWindow(cfg)
         Parent = ScreenGui,
         BackgroundColor3 = self.Theme.Background,
         BorderColor3 = self.Theme.Outline,
-        Position = UDim2.new(.5,-325,.5,-225),
-        Size = cfg.Size or UDim2.fromOffset(650, 450)
-    })
-
-    self:Create("UIStroke", {
-        Parent = Main,
-        Color = self.Theme.Outline
+        Position = UDim2.new(.5,-300,.5,-225),
+        Size = cfg.Size or UDim2.fromOffset(600,450)
     })
 
     local Topbar = self:Create("Frame", {
         Parent = Main,
-        BackgroundColor3 = self.Theme.Surface,
+        BackgroundColor3 = self.Theme.LightBackground,
         BorderSizePixel = 0,
-        Size = UDim2.new(1,0,0,32)
+        Size = UDim2.new(1,0,0,30)
     })
 
-    self:Create("TextLabel", {
+    local Title = self:Create("TextLabel", {
         Parent = Topbar,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 10, 0, 0),
-        Size = UDim2.new(1, -10, 1, 0),
+        Size = UDim2.new(1,0,1,0),
         Font = Enum.Font.Code,
         Text = cfg.Title or "gamesense.pub",
         TextColor3 = self.Theme.Text,
-        TextSize = 15,
-        TextXAlignment = Enum.TextXAlignment.Left
+        TextSize = 15
     })
 
-    local Sidebar = self:Create("Frame", {
+    local TabButtons = self:Create("Frame", {
         Parent = Main,
-        BackgroundColor3 = self.Theme.Surface,
+        BackgroundColor3 = self.Theme.LightBackground,
         BorderSizePixel = 0,
-        Position = UDim2.new(0,0,0,32),
-        Size = UDim2.new(0,130,1,-32)
+        Position = UDim2.new(0,0,0,30),
+        Size = UDim2.new(0,120,1,-30)
     })
 
-    local SideLayout = self:Create("UIListLayout", {
-        Parent = Sidebar,
-        Padding = UDim.new(0,4)
+    local TabList = self:Create("UIListLayout", {
+        Parent = TabButtons,
+        Padding = UDim.new(0,2)
     })
 
-    local Content = self:Create("Frame", {
+    local Container = self:Create("Frame", {
         Parent = Main,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0,140,0,42),
-        Size = UDim2.new(1,-150,1,-52)
+        Position = UDim2.new(0,125,0,35),
+        Size = UDim2.new(1,-130,1,-40)
     })
 
-    -- drag
+    -- dragging
     do
         local dragging
         local dragInput
@@ -199,11 +249,10 @@ function Library:CreateWindow(cfg)
         local Tab = {}
 
         local Button = Library:Create("TextButton", {
-            Parent = Sidebar,
+            Parent = TabButtons,
             BackgroundColor3 = Library.Theme.Background,
             BorderColor3 = Library.Theme.Outline,
-            Size = UDim2.new(1, -8, 0, 30),
-            Position = UDim2.new(0,4,0,0),
+            Size = UDim2.new(1,0,0,30),
             Font = Enum.Font.Code,
             Text = name,
             TextColor3 = Library.Theme.DarkText,
@@ -211,100 +260,101 @@ function Library:CreateWindow(cfg)
         })
 
         local Page = Library:Create("ScrollingFrame", {
-            Parent = Content,
+            Parent = Container,
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
-            Visible = false,
             Size = UDim2.new(1,0,1,0),
+            CanvasSize = UDim2.new(0,0,0,0),
             ScrollBarThickness = 3,
-            CanvasSize = UDim2.new()
+            Visible = false,
+            AutomaticCanvasSize = Enum.AutomaticSize.Y
         })
 
-        local PageLayout = Library:Create("UIListLayout", {
+        local Layout = Library:Create("UIListLayout", {
             Parent = Page,
             Padding = UDim.new(0,8)
         })
 
-        PageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            Page.CanvasSize = UDim2.new(
-                0,
-                0,
-                0,
-                PageLayout.AbsoluteContentSize.Y + 10
-            )
-        end)
-
         Button.MouseButton1Click:Connect(function()
-            for _,v in pairs(Content:GetChildren()) do
+            for _,v in pairs(Container:GetChildren()) do
                 if v:IsA("ScrollingFrame") then
                     v.Visible = false
                 end
             end
 
-            for _,v in pairs(Sidebar:GetChildren()) do
-                if v:IsA("TextButton") then
-                    v.TextColor3 = Library.Theme.DarkText
-                end
-            end
-
-            Button.TextColor3 = Library.Theme.Text
             Page.Visible = true
         end)
 
-        if #Content:GetChildren() <= 1 then
+        if #Container:GetChildren() <= 1 then
             Page.Visible = true
-            Button.TextColor3 = Library.Theme.Text
         end
 
-        function Tab:CreateSection(title)
+        function Tab:CreateSection(sectionName)
             local Section = {}
 
             local Holder = Library:Create("Frame", {
                 Parent = Page,
-                BackgroundColor3 = Library.Theme.Surface,
+                BackgroundColor3 = Library.Theme.LightBackground,
                 BorderColor3 = Library.Theme.Outline,
-                Size = UDim2.new(1,-5,0,40)
+                Size = UDim2.new(1,-5,0,35)
             })
 
-            local SectionLabel = Library:Create("TextLabel", {
+            local SectionTitle = Library:Create("TextLabel", {
                 Parent = Holder,
                 BackgroundTransparency = 1,
                 Position = UDim2.new(0,10,0,0),
                 Size = UDim2.new(1,-10,0,25),
                 Font = Enum.Font.Code,
-                Text = title,
+                Text = sectionName,
                 TextColor3 = Library.Theme.Text,
                 TextSize = 14,
                 TextXAlignment = Enum.TextXAlignment.Left
             })
 
-            local Inline = Library:Create("Frame", {
+            local Inner = Library:Create("Frame", {
                 Parent = Holder,
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0,8,0,28),
-                Size = UDim2.new(1,-16,1,-35)
+                Position = UDim2.new(0,5,0,30),
+                Size = UDim2.new(1,-10,1,-35)
             })
 
-            local InlineLayout = Library:Create("UIListLayout", {
-                Parent = Inline,
+            local InnerLayout = Library:Create("UIListLayout", {
+                Parent = Inner,
                 Padding = UDim.new(0,5)
             })
 
-            InlineLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            local function Resize()
                 Holder.Size = UDim2.new(
                     1,
                     -5,
                     0,
-                    InlineLayout.AbsoluteContentSize.Y + 38
+                    InnerLayout.AbsoluteContentSize.Y + 40
                 )
-            end)
+            end
+
+            InnerLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(Resize)
+
+            function Section:CreateLabel(text)
+                local Label = Library:Create("TextLabel", {
+                    Parent = Inner,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1,0,0,20),
+                    Font = Enum.Font.Code,
+                    Text = text,
+                    TextColor3 = Library.Theme.DarkText,
+                    TextSize = 13,
+                    TextXAlignment = Enum.TextXAlignment.Left
+                })
+
+                return Label
+            end
 
             function Section:CreateButton(cfg)
                 local Button = Library:Create("TextButton", {
-                    Parent = Inline,
+                    Parent = Inner,
                     BackgroundColor3 = Library.Theme.Background,
                     BorderColor3 = Library.Theme.Outline,
-                    Size = UDim2.new(1,0,0,24),
+                    Size = UDim2.new(1,0,0,25),
                     Font = Enum.Font.Code,
                     Text = cfg.Name,
                     TextColor3 = Library.Theme.Text,
@@ -312,47 +362,33 @@ function Library:CreateWindow(cfg)
                 })
 
                 Button.MouseButton1Click:Connect(function()
-                    cfg.Callback()
+                    if cfg.Callback then
+                        cfg.Callback()
+                    end
                 end)
             end
 
             function Section:CreateToggle(cfg)
-                local Enabled = cfg.Default or false
+                local State = cfg.Default or false
 
                 local Toggle = Library:Create("TextButton", {
-                    Parent = Inline,
+                    Parent = Inner,
                     BackgroundColor3 = Library.Theme.Background,
                     BorderColor3 = Library.Theme.Outline,
-                    Size = UDim2.new(1,0,0,24),
+                    Size = UDim2.new(1,0,0,25),
                     Font = Enum.Font.Code,
-                    Text = cfg.Name,
+                    Text = cfg.Name .. " [" .. (State and "ON" or "OFF") .. "]",
                     TextColor3 = Library.Theme.Text,
                     TextSize = 13
                 })
 
-                local Indicator = Library:Create("Frame", {
-                    Parent = Toggle,
-                    BackgroundColor3 = Enabled and Library.Theme.Accent or Color3.fromRGB(60,60,60),
-                    BorderSizePixel = 0,
-                    Position = UDim2.new(1,-18,.5,-5),
-                    Size = UDim2.new(0,10,0,10)
-                })
-
                 Toggle.MouseButton1Click:Connect(function()
-                    Enabled = not Enabled
+                    State = not State
 
-                    TweenService:Create(
-                        Indicator,
-                        TweenInfo.new(.15),
-                        {
-                            BackgroundColor3 = Enabled
-                                and Library.Theme.Accent
-                                or Color3.fromRGB(60,60,60)
-                        }
-                    ):Play()
+                    Toggle.Text = cfg.Name .. " [" .. (State and "ON" or "OFF") .. "]"
 
                     if cfg.Callback then
-                        cfg.Callback(Enabled)
+                        cfg.Callback(State)
                     end
                 end)
             end
@@ -360,159 +396,63 @@ function Library:CreateWindow(cfg)
             function Section:CreateSlider(cfg)
                 local Value = cfg.Default or cfg.Min
 
-                local SliderFrame = Library:Create("Frame", {
-                    Parent = Inline,
+                local Slider = Library:Create("TextButton", {
+                    Parent = Inner,
                     BackgroundColor3 = Library.Theme.Background,
                     BorderColor3 = Library.Theme.Outline,
-                    Size = UDim2.new(1,0,0,38)
-                })
-
-                local Label = Library:Create("TextLabel", {
-                    Parent = SliderFrame,
-                    BackgroundTransparency = 1,
-                    Position = UDim2.new(0,8,0,0),
-                    Size = UDim2.new(1,-16,0,18),
+                    Size = UDim2.new(1,0,0,25),
                     Font = Enum.Font.Code,
-                    Text = cfg.Name .. " : " .. tostring(Value),
+                    Text = cfg.Name .. ": " .. Value,
                     TextColor3 = Library.Theme.Text,
-                    TextSize = 13,
-                    TextXAlignment = Enum.TextXAlignment.Left
+                    TextSize = 13
                 })
 
-                local Bar = Library:Create("Frame", {
-                    Parent = SliderFrame,
-                    BackgroundColor3 = Color3.fromRGB(45,45,45),
-                    BorderSizePixel = 0,
-                    Position = UDim2.new(0,8,0,25),
-                    Size = UDim2.new(1,-16,0,4)
-                })
+                Slider.MouseButton1Click:Connect(function()
+                    Value += 1
 
-                local Fill = Library:Create("Frame", {
-                    Parent = Bar,
-                    BackgroundColor3 = Library.Theme.Accent,
-                    BorderSizePixel = 0,
-                    Size = UDim2.new(
-                        (Value-cfg.Min)/(cfg.Max-cfg.Min),
-                        0,
-                        1,
-                        0
-                    )
-                })
+                    if Value > cfg.Max then
+                        Value = cfg.Min
+                    end
 
-                local dragging = false
-
-                local function Update(input)
-                    local percent = math.clamp(
-                        (input.Position.X - Bar.AbsolutePosition.X)
-                        / Bar.AbsoluteSize.X,
-                        0,
-                        1
-                    )
-
-                    Value = math.floor(
-                        cfg.Min + ((cfg.Max-cfg.Min) * percent)
-                    )
-
-                    Fill.Size = UDim2.new(percent,0,1,0)
-
-                    Label.Text = cfg.Name .. " : " .. tostring(Value)
+                    Slider.Text = cfg.Name .. ": " .. Value
 
                     if cfg.Callback then
                         cfg.Callback(Value)
-                    end
-                end
-
-                Bar.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        dragging = true
-                        Update(input)
-                    end
-                end)
-
-                UIS.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        dragging = false
-                    end
-                end)
-
-                UIS.InputChanged:Connect(function(input)
-                    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                        Update(input)
                     end
                 end)
             end
 
             function Section:CreateDropdown(cfg)
-                local Open = false
                 local Current = cfg.Default or cfg.Options[1]
 
                 local Dropdown = Library:Create("TextButton", {
-                    Parent = Inline,
+                    Parent = Inner,
                     BackgroundColor3 = Library.Theme.Background,
                     BorderColor3 = Library.Theme.Outline,
-                    Size = UDim2.new(1,0,0,24),
+                    Size = UDim2.new(1,0,0,25),
                     Font = Enum.Font.Code,
-                    Text = cfg.Name .. " : " .. tostring(Current),
+                    Text = cfg.Name .. ": " .. tostring(Current),
                     TextColor3 = Library.Theme.Text,
                     TextSize = 13
                 })
 
-                local Container = Library:Create("Frame", {
-                    Parent = Inline,
-                    BackgroundColor3 = Library.Theme.Surface2,
-                    BorderColor3 = Library.Theme.Outline,
-                    Visible = false,
-                    Size = UDim2.new(1,0,0,#cfg.Options * 22)
-                })
-
-                local Layout = Library:Create("UIListLayout", {
-                    Parent = Container
-                })
-
-                for _,option in ipairs(cfg.Options) do
-                    local Opt = Library:Create("TextButton", {
-                        Parent = Container,
-                        BackgroundColor3 = Library.Theme.Background,
-                        BorderColor3 = Library.Theme.Outline,
-                        Size = UDim2.new(1,0,0,20),
-                        Font = Enum.Font.Code,
-                        Text = option,
-                        TextColor3 = Library.Theme.Text,
-                        TextSize = 13
-                    })
-
-                    Opt.MouseButton1Click:Connect(function()
-                        Current = option
-
-                        Dropdown.Text =
-                            cfg.Name .. " : " .. tostring(Current)
-
-                        Container.Visible = false
-                        Open = false
-
-                        if cfg.Callback then
-                            cfg.Callback(Current)
-                        end
-                    end)
-                end
+                local index = table.find(cfg.Options, Current) or 1
 
                 Dropdown.MouseButton1Click:Connect(function()
-                    Open = not Open
-                    Container.Visible = Open
-                end)
-            end
+                    index += 1
 
-            function Section:CreateLabel(text)
-                Library:Create("TextLabel", {
-                    Parent = Inline,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1,0,0,18),
-                    Font = Enum.Font.Code,
-                    Text = text,
-                    TextColor3 = Library.Theme.DarkText,
-                    TextSize = 13,
-                    TextXAlignment = Enum.TextXAlignment.Left
-                })
+                    if index > #cfg.Options then
+                        index = 1
+                    end
+
+                    Current = cfg.Options[index]
+
+                    Dropdown.Text = cfg.Name .. ": " .. tostring(Current)
+
+                    if cfg.Callback then
+                        cfg.Callback(Current)
+                    end
+                end)
             end
 
             return Section
